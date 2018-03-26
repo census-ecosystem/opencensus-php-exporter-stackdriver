@@ -1,7 +1,7 @@
 # OpenCensus Stackdriver Exporter for PHP
 
 This library provides an [`ExporterInterface`][exporter-interface] for exporting
-Trace data to a Stackdriver instance.
+Trace data to the [Stackdriver Trace][stackdriver-trace] service.
 
 [![CircleCI](https://circleci.com/gh/census-instrumentation/opencensus-php-exporter-stackdriver.svg?style=svg)](https://circleci.com/gh/census-instrumentation/opencensus-php-exporter-stackdriver)
 [![Packagist](https://img.shields.io/packagist/v/opencensus/opencensus-exporter-stackdriver.svg)](https://packagist.org/packages/opencensus/opencensus)
@@ -21,7 +21,7 @@ Trace data to a Stackdriver instance.
     use OpenCensus\Trace\Tracer;
     use OpenCensus\Trace\Exporter\StackdriverExporter;
 
-    Tracer::start(new StackdriverExporter('my-service-name'));
+    Tracer::start(new StackdriverExporter());
     ```
 
 ## Customization
@@ -70,6 +70,7 @@ Apache 2.0 - See [LICENSE](LICENSE) for more information.
 This is not an official Google product.
 
 [exporter-interface]: https://github.com/census-instrumentation/opencensus-php/blob/master/src/Trace/Exporter/ExporterInterface.php
+[stackdriver-trace]: https://cloud.google.com/trace/
 [census-org]: https://github.com/census-instrumentation
 [composer]: https://getcomposer.org/
 [semver]: http://semver.org/
