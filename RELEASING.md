@@ -8,4 +8,4 @@ The PHP library and extension are released independently of each other.
 
 1. Click `Update` from the admin view of the [opencensus/opencensus-exporter-stackdriver][packagist] package.
 
-[packagist]: https://packagist.org/packages/opencensus/opencensus
+[packagist]: https://packagist.org/packages/opencensus/opencensus-exporter-stackdriver
