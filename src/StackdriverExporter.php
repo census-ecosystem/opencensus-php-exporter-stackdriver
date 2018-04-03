@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2018 OpenCensus Authors
+ * Copyright 2017 OpenCensus Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,13 @@
 
 namespace OpenCensus\Trace\Exporter;
 
-use OpenCensus\Trace\Tracer\TracerInterface;
+use Google\Cloud\Core\Batch\BatchRunner;
+use Google\Cloud\Core\Batch\BatchTrait;
+use Google\Cloud\Trace\TraceClient;
+use Google\Cloud\Trace\Span;
+use Google\Cloud\Trace\Trace;
+use OpenCensus\Trace\SpanData;
+use OpenCensus\Trace\Exporter\Stackdriver\SpanConverter;
 
 /**
  * This implementation of the ExporterInterface use the BatchRunner to provide
@@ -65,15 +71,110 @@ use OpenCensus\Trace\Tracer\TracerInterface;
  */
 class StackdriverExporter implements ExporterInterface
 {
+    use BatchTrait;
+
+    /**
+     * @var TraceClient
+     */
+    private static $client;
+
+    /**
+     * @var bool
+     */
+    private $async;
+
+    /**
+     * @var array
+     */
+    private $clientConfig;
+
+    /**
+     * Create a TraceExporter that utilizes background batching.
+     *
+     * @param array $options [optional] Configuration options.
+     *
+     *     @type TraceClient $client A trace client used to instantiate traces
+     *           to be delivered to the batch queue.
+     *     @type bool $debugOutput Whether or not to output debug information.
+     *           Please note debug output currently only applies in CLI based
+     *           applications. **Defaults to** `false`.
+     *     @type array $batchOptions A set of options for a BatchJob. See
+     *           <a href="https://github.com/GoogleCloudPlatform/google-cloud-php/blob/master/src/Core/Batch/BatchJob.php">\Google\Cloud\Core\Batch\BatchJob::__construct()</a>
+     *           for more details.
+     *           **Defaults to** ['batchSize' => 1000,
+     *                            'callPeriod' => 2.0,
+     *                            'workerNum' => 2].
+     *     @type array $clientConfig Configuration options for the Trace client
+     *           used to handle processing of batch items.
+     *           For valid options please see
+     *           <a href="https://github.com/GoogleCloudPlatform/google-cloud-php/blob/master/src/Trace/TraceClient.php">\Google\Cloud\Trace\TraceClient::__construct()</a>.
+     *     @type BatchRunner $batchRunner A BatchRunner object. Mainly used for
+     *           the tests to inject a mock. **Defaults to** a newly created
+     *           BatchRunner.
+     *     @type string $identifier An identifier for the batch job.
+     *           **Defaults to** `stackdriver-trace`.
+     *     @type bool $async Whether we should try to use the batch runner.
+     *           **Defaults to** `false`.
+     */
+    public function __construct(array $options = [])
+    {
+        $options += [
+            'async' => false,
+            'client' => null
+        ];
+        $this->async = $options['async'];
+        $this->setCommonBatchProperties($options + [
+            'identifier' => 'stackdriver-trace',
+            'batchMethod' => 'insertBatch'
+        ]);
+        self::$client = $options['client'] ?: new TraceClient($this->clientConfig);
+    }
+
     /**
      * Report the provided Trace to a backend.
      *
-     * @param  TracerInterface $tracer
+     * @param SpanData[] $spans
      * @return bool
      */
-    public function report(TracerInterface $tracer)
+    public function export(array $spans)
     {
-        // TODO: Implement this
-        return false;
+        if (empty($spans)) {
+            return false;
+        }
+
+        // Pull the traceId from the first span
+        $spans = array_map([SpanConverter::class, 'convertSpan'], $spans);
+        $trace = self::$client->trace(
+            $spans[0]->traceId()
+        );
+
+        // build a Trace object and assign Spans
+        $trace->setSpans($spans);
+
+        try {
+            if ($this->async) {
+                return $this->batchRunner->submitItem($this->identifier, $trace);
+            } else {
+                return self::$client->insert($trace);
+            }
+        } catch (\Exception $e) {
+            error_log('Reporting the Trace data failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Returns an array representation of a callback which will be used to write
+     * batch items.
+     *
+     * @return array
+     */
+    protected function getCallback()
+    {
+        if (!isset(self::$client)) {
+            self::$client = new TraceClient($this->clientConfig);
+        }
+
+        return [self::$client, $this->batchMethod];
     }
 }
