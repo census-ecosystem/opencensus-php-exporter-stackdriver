@@ -4,7 +4,7 @@
     "type": "library",
     "require": {
         "php": ">=5.6",
-        "opencensus/opencensus": "^0.2",
+        "opencensus/opencensus": "^0.4",
         "google/cloud-trace": "^0.4"
     },
     "require-dev": {
@@ -21,7 +21,7 @@
     "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
-            "OpenCensus\\Trace\\": "src/Trace/"
+            "OpenCensus\\Trace\\Exporter\\": "src/"
         }
     }
 }
