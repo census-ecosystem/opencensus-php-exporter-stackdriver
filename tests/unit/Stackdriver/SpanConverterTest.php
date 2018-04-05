@@ -33,6 +33,8 @@ use PHPUnit\Framework\TestCase;
  */
 class SpanConverterTest extends TestCase
 {
+    const TIMESTAMP_FORMAT_REGEXP = '/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{9}Z/';
+
     /**
      * @var SpanData[]
      */
@@ -65,8 +67,8 @@ class SpanConverterTest extends TestCase
         $this->assertInternalType('string', $span->name());
         $this->assertInternalType('string', $span->spanId());
         $this->assertNull($span->parentSpanId());
-        $this->assertRegExp('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{9}Z/', $span->jsonSerialize()['startTime']);
-        $this->assertRegExp('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{9}Z/', $span->jsonSerialize()['endTime']);
+        $this->assertRegExp(self::TIMESTAMP_FORMAT_REGEXP, $span->jsonSerialize()['startTime']);
+        $this->assertRegExp(self::TIMESTAMP_FORMAT_REGEXP, $span->jsonSerialize()['endTime']);
     }
 
     public function testSetSpanIds()
@@ -176,14 +178,14 @@ class SpanConverterTest extends TestCase
         $this->assertCount(2, $timeEvents);
         $event1 = $timeEvents[0];
         $this->assertEquals('some-description', $event1['annotation']['description']['value']);
-        $this->assertRegExp('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{9}Z/', $event1['time']);
+        $this->assertRegExp(self::TIMESTAMP_FORMAT_REGEXP, $event1['time']);
 
         $event2 = $timeEvents[1];
         $this->assertEquals('SENT', $event2['messageEvent']['type']);
         $this->assertEquals('message-id', $event2['messageEvent']['id']);
         $this->assertEquals(234, $event2['messageEvent']['uncompressedSizeBytes']);
         $this->assertEquals(123, $event2['messageEvent']['compressedSizeBytes']);
-        $this->assertRegExp('/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{9}Z/', $event2['time']);
+        $this->assertRegExp(self::TIMESTAMP_FORMAT_REGEXP, $event2['time']);
     }
 
     public function testStatus()
