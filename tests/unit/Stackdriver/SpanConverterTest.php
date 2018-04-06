@@ -157,15 +157,18 @@ class SpanConverterTest extends TestCase
 
     public function testTimeEvents()
     {
+        $time = 1490737450.484299;
         $span = new OCSpan([
             'traceId' => 'aaa',
             'timeEvents' => [
                 new OCAnnotation('some-description', [
-                    'attributes' => ['foo' => 'bar']
+                    'attributes' => ['foo' => 'bar'],
+                    'time' => $time
                 ]),
                 new OCMessageEvent(OCMessageEvent::TYPE_SENT, 'message-id', [
                     'uncompressedSize' => 234,
-                    'compressedSize' => 123
+                    'compressedSize' => 123,
+                    'time' => $time
                 ])
             ],
             'startTime' => new \DateTime(),
@@ -179,6 +182,7 @@ class SpanConverterTest extends TestCase
         $event1 = $timeEvents[0];
         $this->assertEquals('some-description', $event1['annotation']['description']['value']);
         $this->assertRegExp(self::TIMESTAMP_FORMAT_REGEXP, $event1['time']);
+        $this->assertEquals('2017-03-28T21:44:10.484299000Z', $event1['time']);
 
         $event2 = $timeEvents[1];
         $this->assertEquals('SENT', $event2['messageEvent']['type']);
@@ -186,6 +190,7 @@ class SpanConverterTest extends TestCase
         $this->assertEquals(234, $event2['messageEvent']['uncompressedSizeBytes']);
         $this->assertEquals(123, $event2['messageEvent']['compressedSizeBytes']);
         $this->assertRegExp(self::TIMESTAMP_FORMAT_REGEXP, $event2['time']);
+        $this->assertEquals('2017-03-28T21:44:10.484299000Z', $event2['time']);
     }
 
     public function testStatus()
