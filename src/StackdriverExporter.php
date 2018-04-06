@@ -24,6 +24,7 @@ use Google\Cloud\Trace\Span;
 use Google\Cloud\Trace\Trace;
 use OpenCensus\Trace\SpanData;
 use OpenCensus\Trace\Exporter\Stackdriver\SpanConverter;
+use OpenCensus\Version;
 
 /**
  * This implementation of the ExporterInterface use the BatchRunner to provide
@@ -71,6 +72,8 @@ use OpenCensus\Trace\Exporter\Stackdriver\SpanConverter;
  */
 class StackdriverExporter implements ExporterInterface
 {
+    const AGENT = 'g.co/agent';
+
     use BatchTrait;
 
     /**
@@ -144,8 +147,13 @@ class StackdriverExporter implements ExporterInterface
 
         // Pull the traceId from the first span
         $spans = array_map([SpanConverter::class, 'convertSpan'], $spans);
+        $rootSpan = $spans[0];
         $trace = self::$client->trace(
-            $spans[0]->traceId()
+            $rootSpan->traceId()
+        );
+        $rootSpan->addAttribute(
+            self::AGENT,
+            sprintf('opencensus-php [%s]', Version::VERSION)
         );
 
         // build a Trace object and assign Spans
