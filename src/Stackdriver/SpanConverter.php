@@ -120,7 +120,8 @@ class SpanConverter
     private static function convertAnnotation(OCAnnotation $annotation)
     {
         return new Annotation($annotation->description(), [
-            'attributes' => $annotation->attributes()
+            'attributes' => $annotation->attributes(),
+            'time' => $annotation->time()
         ]);
     }
 
@@ -129,7 +130,8 @@ class SpanConverter
         return new MessageEvent($messageEvent->id(), [
             'type' => self::MESSAGE_TYPE_MAP[$messageEvent->type()],
             'uncompressedSizeBytes' => $messageEvent->uncompressedSize(),
-            'compressedSizeBytes' => $messageEvent->compressedSize()
+            'compressedSizeBytes' => $messageEvent->compressedSize(),
+            'time' => $messageEvent->time()
         ]);
     }
 
