@@ -26,7 +26,21 @@ Trace data to the [Stackdriver Trace][stackdriver-trace] service.
 
 ## Customization
 
-TODO: Fill out these instructions
+You may provide an associative array of options to the `StackdriverExporter` at
+initialization:
+
+```php
+$options = [];
+$exporter = new StackdriverExporter($options);
+```
+
+The following options are available:
+
+| Option | Default | Description |
+| ------ | ------- | ----------- |
+| `client` | `new TraceClient($clientConfig)` | A configured [`TraceClient`][trace-client] to use to export traces |
+| `clientConfig` | `[]` | Options to pass to the default TraceClient |
+
 
 ## Versioning
 
@@ -74,3 +88,5 @@ This is not an official Google product.
 [census-org]: https://github.com/census-instrumentation
 [composer]: https://getcomposer.org/
 [semver]: http://semver.org/
+[trace-client]: https://googlecloudplatform.github.io/google-cloud-php/#/docs/google-cloud/v0.59.0/trace/traceclient
+[google-cloud-php]: https://github.com/GoogleCloudPlatform/google-cloud-php
