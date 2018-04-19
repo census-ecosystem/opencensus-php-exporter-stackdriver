@@ -25,6 +25,7 @@ use OpenCensus\Trace\Tracer\TracerInterface;
 use OpenCensus\Trace\Tracer\ContextTracer;
 use OpenCensus\Trace\Span as OCSpan;
 use Prophecy\Argument;
+use Google\Cloud\Core\Batch\BatchRunner;
 use Google\Cloud\Trace\Trace;
 use Google\Cloud\Trace\Span;
 use Google\Cloud\Trace\TraceClient;
@@ -63,15 +64,20 @@ class StackdriverExporterTest extends TestCase
 
     public function testReportWithAnExceptionErrorLog()
     {
-        $this->client->insert(Argument::any())->willThrow(
-            new \Exception('error_log test')
-        );
         $trace = $this->prophesize(Trace::class);
         $trace->setSpans(Argument::any())->shouldBeCalled();
         $this->client->trace(Argument::any())->willReturn($trace->reveal());
-        $exporter = new StackdriverExporter(
-            ['client' => $this->client->reveal()]
-        );
+
+        $batchRunner = $this->prophesize(BatchRunner::class);
+        $batchRunner->registerJob(Argument::any(), Argument::any(), Argument::any())->shouldBeCalled();
+        $batchRunner->submitItem(Argument::any(), Argument::any())->willThrow(
+            new \Exception('error_log test')
+        )->shouldBeCalled();
+
+        $exporter = new StackdriverExporter([
+            'client' => $this->client->reveal(),
+            'batchRunner' => $batchRunner->reveal()
+        ]);
         $this->expectOutputString(
             'Reporting the Trace data failed: error_log test'
         );
@@ -95,8 +101,6 @@ class StackdriverExporterTest extends TestCase
             return true;
         }))->shouldBeCalled();
         $this->client->trace('aaa')->willReturn($trace->reveal());
-        $this->client->insert(Argument::type(Trace::class))
-            ->willReturn(true)->shouldBeCalled();
 
         $span = new OCSpan([
             'traceId' => 'aaa'
@@ -104,7 +108,15 @@ class StackdriverExporterTest extends TestCase
         $span->setStartTime();
         $span->setEndTime();
 
-        $exporter = new StackdriverExporter(['client' => $this->client->reveal()]);
+        $batchRunner = $this->prophesize(BatchRunner::class);
+        $batchRunner->registerJob(Argument::any(), Argument::any(), Argument::any())->shouldBeCalled();
+        $batchRunner->submitItem(Argument::any(), Argument::any())
+            ->willReturn(true)
+            ->shouldBeCalled();
+        $exporter = new StackdriverExporter([
+            'client' => $this->client->reveal(),
+            'batchRunner' => $batchRunner->reveal()
+        ]);
         $this->assertTrue($exporter->export([$span->spanData()]));
     }
 }

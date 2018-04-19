@@ -47,28 +47,8 @@ use OpenCensus\Version;
  * Stackdriver Trace. You can enable an experimental asynchronous reporting
  * mechanism using
  * <a href="https://github.com/GoogleCloudPlatform/google-cloud-php/tree/master/src/Core/Batch">BatchDaemon</a>.
- *
- * Example:
- * ```
- * use OpenCensus\Trace\Tracer;
- * use OpenCensus\Trace\Exporter\StackdriverExporter;
- *
- * $reporter = new StackdriverExporter([
- *   'async' => true,
- *   'clientConfig' => [
- *      'projectId' => 'my-project'
- *   ]
- * ]);
- * Tracer::start($reporter);
- * ```
- *
- * Note that to use the `async` option, you will also need to set the
+ * To enable asynchronous exporting, set the
  * `IS_BATCH_DAEMON_RUNNING` environment variable to `true`.
- *
- * @experimental The experimental flag means that while we believe this method
- *      or class is ready for use, it may change before release in backwards-
- *      incompatible ways. Please use with caution, and test thoroughly when
- *      upgrading.
  */
 class StackdriverExporter implements ExporterInterface
 {
@@ -80,11 +60,6 @@ class StackdriverExporter implements ExporterInterface
      * @var TraceClient
      */
     private static $client;
-
-    /**
-     * @var bool
-     */
-    private $async;
 
     /**
      * @var array
@@ -116,8 +91,6 @@ class StackdriverExporter implements ExporterInterface
      *           BatchRunner.
      *     @type string $identifier An identifier for the batch job.
      *           **Defaults to** `stackdriver-trace`.
-     *     @type bool $async Whether we should try to use the batch runner.
-     *           **Defaults to** `false`.
      */
     public function __construct(array $options = [])
     {
@@ -125,7 +98,6 @@ class StackdriverExporter implements ExporterInterface
             'async' => false,
             'client' => null
         ];
-        $this->async = $options['async'];
         $this->setCommonBatchProperties($options + [
             'identifier' => 'stackdriver-trace',
             'batchMethod' => 'insertBatch'
@@ -160,11 +132,7 @@ class StackdriverExporter implements ExporterInterface
         $trace->setSpans($spans);
 
         try {
-            if ($this->async) {
-                return $this->batchRunner->submitItem($this->identifier, $trace);
-            } else {
-                return self::$client->insert($trace);
-            }
+            return $this->batchRunner->submitItem($this->identifier, $trace);
         } catch (\Exception $e) {
             error_log('Reporting the Trace data failed: ' . $e->getMessage());
             return false;
