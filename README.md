@@ -3,8 +3,8 @@
 This library provides an [`ExporterInterface`][exporter-interface] for exporting
 Trace data to the [Stackdriver Trace][stackdriver-trace] service.
 
-[![CircleCI](https://circleci.com/gh/census-instrumentation/opencensus-php-exporter-stackdriver.svg?style=svg)](https://circleci.com/gh/census-instrumentation/opencensus-php-exporter-stackdriver)
-[![Packagist](https://img.shields.io/packagist/v/opencensus/opencensus-exporter-stackdriver.svg)](https://packagist.org/packages/opencensus/opencensus)
+[![CircleCI](https://circleci.com/gh/census-instrumentation/opencensus-php-exporter-stackdriver.svg?style=svg)][ci-build]
+[![Packagist](https://img.shields.io/packagist/v/opencensus/opencensus-exporter-stackdriver.svg)][packagist-package]
 ![PHP-Version](https://img.shields.io/packagist/php-v/opencensus/opencensus-exporter-stackdriver.svg)
 
 ## Installation & basic usage
@@ -44,7 +44,7 @@ The following options are available:
 
 ## Versioning
 
-[![Packagist](https://img.shields.io/packagist/v/opencensus/opencensus-exporter-stackdriver.svg)](https://packagist.org/packages/opencensus/opencensus-exporter-stackdriver)
+[![Packagist](https://img.shields.io/packagist/v/opencensus/opencensus-exporter-stackdriver.svg)][packagist-package]
 
 This library follows [Semantic Versioning][semver].
 
@@ -90,3 +90,5 @@ This is not an official Google product.
 [semver]: http://semver.org/
 [trace-client]: https://googlecloudplatform.github.io/google-cloud-php/#/docs/google-cloud/v0.59.0/trace/traceclient
 [google-cloud-php]: https://github.com/GoogleCloudPlatform/google-cloud-php
+[packagist-package]: https://packagist.org/packages/opencensus/opencensus-exporter-stackdriver
+[ci-build]: https://circleci.com/gh/census-instrumentation/opencensus-php-exporter-stackdriver
