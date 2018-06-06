@@ -29,6 +29,7 @@ use OpenCensus\Trace\Span as OCSpan;
 use OpenCensus\Trace\Status as OCStatus;
 use OpenCensus\Trace\SpanData;
 use OpenCensus\Trace\Exporter\StackdriverExporter;
+use OpenCensus\Version;
 
 /**
  * This class handles converting from the OpenCensus data model into its
@@ -54,6 +55,9 @@ class SpanConverter
         OCMessageEvent::TYPE_SENT => MessageEvent::TYPE_SENT,
         OCMessageEvent::TYPE_RECEIVED => MessageEvent::TYPE_RECEIVED
     ];
+
+    const AGENT = 'g.co/agent';
+    const AGENT_STRING = 'opencensus-php [' . Version::VERSION . '] php-stackdriver-exporter [' . StackdriverExporter::VERSION . ']';
 
     /**
      * Convert an OpenCensus SpanData to its Stackdriver Trace representation.
@@ -85,7 +89,7 @@ class SpanConverter
     private static function convertAttributes(array $attributes)
     {
         $newAttributes = [
-            StackdriverExporter::AGENT => StackdriverExporter::AGENT_STRING
+            self::AGENT => self::AGENT_STRING
         ];
         foreach ($attributes as $key => $value) {
             if (array_key_exists($key, self::ATTRIBUTE_MAP)) {
