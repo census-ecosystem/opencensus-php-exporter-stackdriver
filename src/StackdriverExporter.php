@@ -52,7 +52,9 @@ use OpenCensus\Version;
  */
 class StackdriverExporter implements ExporterInterface
 {
+    const VERSION = '0.1.0';
     const AGENT = 'g.co/agent';
+    const AGENT_STRING = 'opencensus-php [' . Version::VERSION . '] php-stackdriver-exporter [' . self::VERSION . ']';
 
     use BatchTrait;
 
@@ -122,10 +124,6 @@ class StackdriverExporter implements ExporterInterface
         $rootSpan = $spans[0];
         $trace = self::$client->trace(
             $rootSpan->traceId()
-        );
-        $rootSpan->addAttribute(
-            self::AGENT,
-            sprintf('opencensus-php [%s]', Version::VERSION)
         );
 
         // build a Trace object and assign Spans
