@@ -57,7 +57,8 @@ class SpanConverter
     ];
 
     const AGENT = 'g.co/agent';
-    const AGENT_STRING = 'opencensus-php [' . Version::VERSION . '] php-stackdriver-exporter [' . StackdriverExporter::VERSION . ']';
+    const AGENT_STRING = 'opencensus-php [' . Version::VERSION . '] php-stackdriver-exporter [' .
+        StackdriverExporter::VERSION . ']';
 
     /**
      * Convert an OpenCensus SpanData to its Stackdriver Trace representation.
