@@ -56,7 +56,7 @@ class SpanConverter
         OCMessageEvent::TYPE_RECEIVED => MessageEvent::TYPE_RECEIVED
     ];
 
-    const AGENT = 'g.co/agent';
+    const AGENT_KEY = 'g.co/agent';
     const AGENT_STRING = 'opencensus-php [' . Version::VERSION . '] php-stackdriver-exporter [' .
         StackdriverExporter::VERSION . ']';
 
@@ -90,7 +90,7 @@ class SpanConverter
     private static function convertAttributes(array $attributes)
     {
         $newAttributes = [
-            self::AGENT => self::AGENT_STRING
+            self::AGENT_KEY => self::AGENT_STRING
         ];
         foreach ($attributes as $key => $value) {
             if (array_key_exists($key, self::ATTRIBUTE_MAP)) {
