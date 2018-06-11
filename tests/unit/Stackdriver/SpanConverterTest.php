@@ -25,6 +25,7 @@ use OpenCensus\Trace\Span as OCSpan;
 use OpenCensus\Trace\Status as OCStatus;
 use Prophecy\Argument;
 use Google\Cloud\Trace\Link;
+use Google\Cloud\Trace\MessageEvent;
 use Google\Cloud\Trace\Span;
 use PHPUnit\Framework\TestCase;
 
@@ -67,8 +68,8 @@ class SpanConverterTest extends TestCase
         $this->assertInternalType('string', $span->name());
         $this->assertInternalType('string', $span->spanId());
         $this->assertNull($span->parentSpanId());
-        $this->assertRegExp(self::TIMESTAMP_FORMAT_REGEXP, $span->jsonSerialize()['startTime']);
-        $this->assertRegExp(self::TIMESTAMP_FORMAT_REGEXP, $span->jsonSerialize()['endTime']);
+        $this->assertRegExp(self::TIMESTAMP_FORMAT_REGEXP, $span->info()['startTime']);
+        $this->assertRegExp(self::TIMESTAMP_FORMAT_REGEXP, $span->info()['endTime']);
     }
 
     public function testSetSpanIds()
@@ -95,7 +96,7 @@ class SpanConverterTest extends TestCase
 
         $spans = SpanConverter::convertSpan($span->spanData());
 
-        $data = $spans->jsonSerialize();
+        $data = $spans->info();
         $this->assertArrayHasKey('stackTrace', $data);
     }
 
@@ -114,9 +115,9 @@ class SpanConverterTest extends TestCase
 
         $span = SpanConverter::convertSpan($span->spanData());
 
-        $attributes = $span->jsonSerialize()['attributes'];
+        $attributes = $span->info()['attributes']['attributeMap'];
         $this->assertArrayHasKey($expectedAttributeKey, $attributes);
-        $this->assertEquals($expectedAttributeValue, $attributes[$expectedAttributeKey]);
+        $this->assertEquals($expectedAttributeValue, $attributes[$expectedAttributeKey]['stringValue']['value']);
     }
 
     public function attributesToTest()
@@ -146,12 +147,12 @@ class SpanConverterTest extends TestCase
             ]
         ]);
         $span = SpanConverter::convertSpan($span->spanData());
-        $data = json_decode(json_encode($span), true)['links']['link'];
+        $data = $span->info()['links']['link'];
         $this->assertCount(1, $data);
         $link = $data[0];
         $this->assertEquals('traceid', $link['traceId']);
         $this->assertEquals('spanid', $link['spanId']);
-        $this->assertEquals('CHILD_LINKED_SPAN', $link['type']);
+        $this->assertEquals(Link::TYPE_CHILD_LINKED_SPAN, $link['type']);
         $this->assertEquals('bar', $link['attributes']['attributeMap']['foo']['stringValue']['value']);
     }
 
@@ -177,7 +178,7 @@ class SpanConverterTest extends TestCase
         ]);
         $span = SpanConverter::convertSpan($span->spanData());
 
-        $timeEvents = json_decode(json_encode($span), true)['timeEvents']['timeEvent'];
+        $timeEvents = $span->info()['timeEvents']['timeEvent'];
         $this->assertCount(2, $timeEvents);
         $event1 = $timeEvents[0];
         $this->assertEquals('some-description', $event1['annotation']['description']['value']);
@@ -185,7 +186,7 @@ class SpanConverterTest extends TestCase
         $this->assertEquals('2017-03-28T21:44:10.484299000Z', $event1['time']);
 
         $event2 = $timeEvents[1];
-        $this->assertEquals('SENT', $event2['messageEvent']['type']);
+        $this->assertEquals(MessageEvent::TYPE_SENT, $event2['messageEvent']['type']);
         $this->assertEquals('message-id', $event2['messageEvent']['id']);
         $this->assertEquals(234, $event2['messageEvent']['uncompressedSizeBytes']);
         $this->assertEquals(123, $event2['messageEvent']['compressedSizeBytes']);
@@ -204,7 +205,7 @@ class SpanConverterTest extends TestCase
             )
         ]);
         $span = SpanConverter::convertSpan($span->spanData());
-        $data = json_decode(json_encode($span), true);
+        $data = $span->info();
         $this->assertEquals(200, $data['status']['code']);
         $this->assertEquals('OK', $data['status']['message']);
     }
@@ -216,7 +217,7 @@ class SpanConverterTest extends TestCase
             'endTime' => microtime(true) + 10
         ]);
         $span = SpanConverter::convertSpan($span->spanData());
-        $data = json_decode(json_encode($span), true);
+        $data = $span->info();
         $this->assertTrue(!isset($data['status']));
     }
 }

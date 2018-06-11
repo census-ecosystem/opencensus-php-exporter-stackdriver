@@ -95,9 +95,9 @@ class StackdriverExporterTest extends TestCase
         $trace = $this->prophesize(Trace::class);
         $trace->setSpans(Argument::that(function ($spans) {
             $this->assertCount(1, $spans);
-            $attributes = $spans[0]->jsonSerialize()['attributes'];
+            $attributes = $spans[0]->info()['attributes']['attributeMap'];
             $this->assertArrayHasKey('g.co/agent', $attributes);
-            $this->assertRegexp('/\d+\.\d+\.\d+/', $attributes['g.co/agent']);
+            $this->assertRegexp('/\d+\.\d+\.\d+/', $attributes['g.co/agent']['stringValue']['value']);
             return true;
         }))->shouldBeCalled();
         $this->client->trace('aaa')->willReturn($trace->reveal());
