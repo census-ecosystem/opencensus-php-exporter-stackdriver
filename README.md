@@ -88,7 +88,7 @@ This is not an official Google product.
 [census-org]: https://github.com/census-instrumentation
 [composer]: https://getcomposer.org/
 [semver]: http://semver.org/
-[trace-client]: https://googlecloudplatform.github.io/google-cloud-php/#/docs/google-cloud/v0.59.0/trace/traceclient
-[google-cloud-php]: https://github.com/GoogleCloudPlatform/google-cloud-php
+[trace-client]: https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/latest/trace/traceclient
+[google-cloud-php]: https://github.com/googleapis/google-cloud-php
 [packagist-package]: https://packagist.org/packages/opencensus/opencensus-exporter-stackdriver
 [ci-build]: https://circleci.com/gh/census-ecosystem/opencensus-php-exporter-stackdriver
